@@ -32,5 +32,3 @@ jobs:
 
     - name: Deploy
       run: ./deploy_script.sh
-      env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
