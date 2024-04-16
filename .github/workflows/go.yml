@@ -24,7 +24,7 @@ jobs:
           script: |
             cd /var/local/go-ci-cd
             git pull
-            docker stop go-cicd || true
-            docker rm go-cicd || true
             docker build -t go-cicd:latest .
+            docker stop go-cicd-docker || true
+            docker rm go-cicd-docker || true
             docker run -d --name go-cicd-docker -p 9000:5000 go-cicd:latest
