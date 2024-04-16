@@ -20,6 +20,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          port: 25
           script: |
             cd /var/local/go-ci-cd
             git pull
