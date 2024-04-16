@@ -1,4 +1,4 @@
-name: GoLang Docker CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,8 +6,24 @@ on:
       - production
 
 jobs:
-  build:
-    runs-on: self-hosted
-  # deploy:
-  #   runs-on: ubuntu-latest
-   
+  deploy:
+    name: Build and Deploy on Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build and Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/local/go-ci-cd
+            git pull
+            docker build -t go-cicd:latest .
+            docker stop go-cicd || true
+            docker rm go-cicd || true
+            docker run -d --name go-cicd-docker -p 9000:5000 go-cicd:latest
