@@ -12,7 +12,7 @@ func init() {
 
 func pushOrders(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Orders pushed to successfully 2",
+		"message": "Orders pushed to successfully 3",
 		"status":  "OK",
 	})
 }
