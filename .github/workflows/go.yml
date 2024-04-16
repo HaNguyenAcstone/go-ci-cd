@@ -14,16 +14,12 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Setup SSH Key
-        run: |
-          echo "${{ secrets.SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa 
-
       - name: Build and Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
           port: 25
           script: |
             cd /var/local/go-ci-cd
