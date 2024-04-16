@@ -6,32 +6,8 @@ on:
       - production
 
 jobs:
+  build:
+    runs-on: self-hosted
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Copy files and build on server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "."
-          target: "/var/local/go-ci-cd"
-
-      - name: Build and run Docker container
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /var/local/go-ci-cd
-            docker build -t go-production .
-            docker stop go-production || true
-            docker rm go-production || true
-            docker run --name go-production -d -p 9000:5000 go-production
+   
