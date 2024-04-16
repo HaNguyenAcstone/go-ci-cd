@@ -13,18 +13,20 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+        
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Deploy to Server
+        run: ssh -p 25 ${{ secrets.USERNAME }}@${{ secrets.HOST }}
 
       - name: Build and Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 25
-          script: |
-            cd /var/local/go-ci-cd
+        run: cd /var/local/go-ci-cd
             git pull
             docker build -t go-cicd:latest .
             docker stop go-cicd || true
             docker rm go-cicd || true
             docker run -d --name go-cicd-docker -p 9000:5000 go-cicd:latest
+       
