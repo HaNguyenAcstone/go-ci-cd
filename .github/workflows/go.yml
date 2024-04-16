@@ -1,34 +1,37 @@
-name: Go CI/CD Pipeline
+name: GoLang Docker CI/CD
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches:
+      - production
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
-
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.20.4'
-
-    - name: Build
-      run: go build -v ./...
-
   deploy:
-    needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Deploy
-      run: ./deploy_script.sh
+      - name: Copy files and build on server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "."
+          target: "/var/local/go-ci-cd"
+
+      - name: Build and run Docker container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /var/local/go-ci-cd
+            docker build -t go-production .
+            docker stop go-production || true
+            docker rm go-production || true
+            docker run --name go-production -d -p 9000:5000 go-production
